@@ -1,0 +1,6 @@
+# Test-specific rules: test names follow MethodName_Condition_ExpectedResult.
+[*.cs]
+# Test methods are public async methods without the Async suffix; keep the suffix rule for private helpers only.
+dotnet_naming_symbols.async_methods.applicable_accessibilities = private
+# Underscores are part of the test naming convention.
+dotnet_diagnostic.CA1707.severity = none

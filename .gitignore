@@ -6,6 +6,7 @@ obj/
 .vs/
 TestResults/
 *.trx
+*.log
 
 # Node / Angular
 node_modules/
@@ -22,13 +23,18 @@ Thumbs.db
 # Secrets and local environment
 .env
 .env.*
+!.env.example
 *.pem
 *.pfx
+*.p12
+*.key
 appsettings.*.local.json
 
 # Local tooling (never published)
 .dev-runner/
 .claude/
 CLAUDE.md
+CLAUDE.local.md
+.mcp.json
 AGENTS.md
 ai-log.md
