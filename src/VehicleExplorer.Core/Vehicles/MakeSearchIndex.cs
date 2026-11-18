@@ -37,6 +37,20 @@ public sealed class MakeSearchIndex
         ];
     }
 
+    /// <summary>Loads the index only if it is empty (the warm-up service normally loads it at startup).</summary>
+    public async Task EnsureLoadedAsync(INhtsaClient nhtsaClient, CancellationToken cancellationToken)
+    {
+        if (!IsLoaded)
+        {
+            await LoadAsync(nhtsaClient, cancellationToken);
+        }
+    }
+
+    /// <summary>Returns the make with this id, or null if NHTSA has no such make.</summary>
+    /// <remarks>A linear scan of about 12,000 integers takes microseconds, so no extra lookup table is kept.</remarks>
+    public VehicleMake? FindMake(int makeId) =>
+        _indexedMakes.FirstOrDefault(indexedMake => indexedMake.Make.Id == makeId)?.Make;
+
     public IReadOnlyList<VehicleMake> Search(string search, int limit)
     {
         var term = Normalize(search);
