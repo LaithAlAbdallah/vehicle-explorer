@@ -32,7 +32,10 @@ public sealed class VehicleCatalogService(INhtsaClient nhtsaClient, MakeSearchIn
         return Merge(make, modelYear, allModels, modelsByVehicleType);
     }
 
-    /// <summary>Returns null instead of throwing, so one failing vehicle type only makes the overview partial.</summary>
+    /// <summary>
+    /// Returns null if NHTSA fails, so one failing vehicle type only makes the overview partial.
+    /// Any other exception (a bug, a cancelled request) is not caught.
+    /// </summary>
     private async Task<(VehicleType VehicleType, IReadOnlyList<VehicleModel>? Models)> TryGetModelsByVehicleTypeAsync(
         int makeId,
         int modelYear,
@@ -44,8 +47,7 @@ public sealed class VehicleCatalogService(INhtsaClient nhtsaClient, MakeSearchIn
             var models = await nhtsaClient.GetModelsByVehicleTypeAsync(makeId, modelYear, vehicleType.Name, cancellationToken);
             return (vehicleType, models);
         }
-        // A timeout is also an OperationCanceledException, so only a cancelled request is let through.
-        catch (Exception) when (!cancellationToken.IsCancellationRequested)
+        catch (NhtsaUnavailableException)
         {
             return (vehicleType, null);
         }

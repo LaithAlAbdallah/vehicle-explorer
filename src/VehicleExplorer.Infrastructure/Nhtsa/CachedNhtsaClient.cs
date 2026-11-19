@@ -64,10 +64,11 @@ public sealed class CachedNhtsaClient(NhtsaClient nhtsaClient, HybridCache cache
             cancellationToken: cancellationToken);
 
         // The duration is chosen before the answer is known, so a fresh empty answer is stored again
-        // with the short duration. Only when fetched now: otherwise every hit would extend it.
+        // with the short duration. Only when fetched now: otherwise every hit would extend it. Not cancelled with the
+        // request: if the user moves on right now, the empty answer must still not keep the long duration.
         if (isFetchedNow && items.Count == 0)
         {
-            await cache.SetAsync(key, items, CreateEntryOptions(_options.EmptyResultDuration), cancellationToken: cancellationToken);
+            await cache.SetAsync(key, items, CreateEntryOptions(_options.EmptyResultDuration), cancellationToken: CancellationToken.None);
         }
 
         return items;

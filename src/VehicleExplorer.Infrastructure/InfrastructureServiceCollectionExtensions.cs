@@ -21,10 +21,12 @@ public static class InfrastructureServiceCollectionExtensions
             httpClient.BaseAddress = options.BaseAddress;
         })
         // Microsoft's standard pipeline: retries with exponential backoff and jitter (on 5xx, 408, 429 and network
-        // errors), 10 s per attempt, a total timeout, and a circuit breaker for a long outage. A person is waiting in
-        // the UI, so it gives up sooner than the defaults (3 retries from 2 s, 30 s in total).
+        // errors), a timeout per attempt and in total, and a circuit breaker for a long outage. A person is waiting in
+        // the UI, so it gives up sooner than the defaults (10 s per attempt, 3 retries from 2 s, 30 s in total):
+        // 3 attempts of at most 5 s, 1 s and 2 s apart, fit in the 20 s total.
         .AddStandardResilienceHandler(options =>
         {
+            options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(5);
             options.Retry.MaxRetryAttempts = 2;
             options.Retry.Delay = TimeSpan.FromSeconds(1);
             options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);

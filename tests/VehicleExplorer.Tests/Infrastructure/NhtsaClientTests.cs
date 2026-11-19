@@ -8,7 +8,7 @@ namespace VehicleExplorer.Tests.Infrastructure;
 public sealed class NhtsaClientTests
 {
     [Fact]
-    public async Task GetMakesAsync_ValidResponse_MapsMakesAndSkipsNamelessItems()
+    public async Task GetMakes_ValidResponse_MapsMakesAndSkipsNamelessItems()
     {
         var handler = StubHttpMessageHandler.RespondingWithJson("""
             {"Count":3,"Results":[
@@ -24,7 +24,7 @@ public sealed class NhtsaClientTests
     }
 
     [Fact]
-    public async Task GetVehicleTypesAsync_ValidResponse_MapsVehicleTypeNames()
+    public async Task GetVehicleTypes_ValidResponse_MapsVehicleTypeNames()
     {
         var handler = StubHttpMessageHandler.RespondingWithJson("""
             {"Results":[{"VehicleTypeId":2,"VehicleTypeName":"Passenger Car"},{"VehicleTypeId":1,"VehicleTypeName":"Motorcycle"}]}
@@ -37,7 +37,7 @@ public sealed class NhtsaClientTests
     }
 
     [Fact]
-    public async Task GetModelsByVehicleTypeAsync_NameWithSpacesAndBrackets_EscapesNameInUrl()
+    public async Task GetModelsByVehicleType_NameWithSpacesAndBrackets_EscapesNameInUrl()
     {
         var handler = StubHttpMessageHandler.RespondingWithJson("""
             {"Results":[{"Model_ID":1861,"Model_Name":"Pilot"}]}
@@ -56,7 +56,7 @@ public sealed class NhtsaClientTests
     }
 
     [Fact]
-    public async Task GetModelsAsync_ResultsMissing_ReturnsEmptyList()
+    public async Task GetModels_ResultsMissing_ReturnsEmptyList()
     {
         var handler = StubHttpMessageHandler.RespondingWithJson("""{"Count":0}""");
 
@@ -66,7 +66,7 @@ public sealed class NhtsaClientTests
     }
 
     [Fact]
-    public async Task GetMakesAsync_ServerError_ThrowsNhtsaUnavailableException()
+    public async Task GetMakes_ServerError_ThrowsNhtsaUnavailableException()
     {
         var handler = StubHttpMessageHandler.RespondingWithStatus(HttpStatusCode.InternalServerError);
 
@@ -75,7 +75,7 @@ public sealed class NhtsaClientTests
     }
 
     [Fact]
-    public async Task GetMakesAsync_ResponseIsNotJson_ThrowsNhtsaUnavailableException()
+    public async Task GetMakes_ResponseIsNotJson_ThrowsNhtsaUnavailableException()
     {
         var handler = StubHttpMessageHandler.RespondingWithJson("<html>Too many requests</html>");
 

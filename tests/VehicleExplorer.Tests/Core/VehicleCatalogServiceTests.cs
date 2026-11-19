@@ -30,7 +30,7 @@ public sealed class VehicleCatalogServiceTests
     }
 
     [Fact]
-    public async Task GetModelYearOverviewAsync_UnknownMake_ReturnsNull()
+    public async Task GetModelYearOverview_UnknownMake_ReturnsNull()
     {
         var overview = await GetOverviewAsync(makeId: 999);
 
@@ -38,7 +38,7 @@ public sealed class VehicleCatalogServiceTests
     }
 
     [Fact]
-    public async Task GetModelYearOverviewAsync_ModelInSeveralTypes_ListsModelOnceWithAllItsTypes()
+    public async Task GetModelYearOverview_ModelInSeveralTypes_ListsModelOnceWithAllItsTypes()
     {
         var overview = await GetOverviewAsync();
 
@@ -47,7 +47,7 @@ public sealed class VehicleCatalogServiceTests
     }
 
     [Fact]
-    public async Task GetModelYearOverviewAsync_ModelInNoType_ListsModelWithoutTypes()
+    public async Task GetModelYearOverview_ModelInNoType_ListsModelWithoutTypes()
     {
         var overview = await GetOverviewAsync();
 
@@ -56,7 +56,7 @@ public sealed class VehicleCatalogServiceTests
     }
 
     [Fact]
-    public async Task GetModelYearOverviewAsync_AllTypesLoaded_CountsModelsPerTypeAndLeavesOutEmptyTypes()
+    public async Task GetModelYearOverview_AllTypesLoaded_CountsModelsPerTypeAndLeavesOutEmptyTypes()
     {
         var overview = await GetOverviewAsync();
 
@@ -67,7 +67,7 @@ public sealed class VehicleCatalogServiceTests
     }
 
     [Fact]
-    public async Task GetModelYearOverviewAsync_AllTypesLoaded_SortsModelsByName()
+    public async Task GetModelYearOverview_AllTypesLoaded_SortsModelsByName()
     {
         var overview = await GetOverviewAsync();
 
@@ -75,7 +75,7 @@ public sealed class VehicleCatalogServiceTests
     }
 
     [Fact]
-    public async Task GetModelYearOverviewAsync_OneVehicleTypeFails_ReturnsPartialOverview()
+    public async Task GetModelYearOverview_OneVehicleTypeFails_ReturnsPartialOverview()
     {
         _nhtsaClient.FailingVehicleTypeNames.Add(_multipurposePassengerVehicle.Name);
 
@@ -88,7 +88,7 @@ public sealed class VehicleCatalogServiceTests
     }
 
     [Fact]
-    public async Task GetModelYearOverviewAsync_FullModelListFails_ThrowsNhtsaUnavailableException()
+    public async Task GetModelYearOverview_FullModelListFails_ThrowsNhtsaUnavailableException()
     {
         _nhtsaClient.IsModelListFailing = true;
 

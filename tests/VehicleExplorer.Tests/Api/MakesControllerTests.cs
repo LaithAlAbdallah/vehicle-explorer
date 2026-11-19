@@ -60,6 +60,21 @@ public sealed class MakesControllerTests : IDisposable
     }
 
     [Fact]
+    public async Task GetModelYearOverview_OneVehicleTypeFails_Returns200WithUnavailableVehicleTypes()
+    {
+        _nhtsaClient.FailingVehicleTypeNames.Add("Passenger Car");
+        using var client = _factory.CreateClient();
+
+        var overview = await client.GetFromJsonAsync<JsonElement>(
+            "/api/makes/474/model-years/2015",
+            TestContext.Current.CancellationToken);
+
+        Assert.False(overview.GetProperty("isComplete").GetBoolean());
+        Assert.Equal("Passenger Car", overview.GetProperty("unavailableVehicleTypes")[0].GetString());
+        Assert.Equal("Accord", overview.GetProperty("models")[0].GetProperty("name").GetString());
+    }
+
+    [Fact]
     public async Task GetModelYearOverview_UnknownMake_Returns404()
     {
         using var client = _factory.CreateClient();

@@ -28,7 +28,7 @@ public sealed partial class NhtsaUnavailableExceptionHandler(
             {
                 Status = StatusCodes.Status503ServiceUnavailable,
                 Title = "Vehicle data is temporarily unavailable.",
-                Detail = "The NHTSA vehicle database did not respond. Please try again in a moment.",
+                Detail = "The NHTSA vehicle database could not be reached. Please try again in a moment.",
             },
         });
     }

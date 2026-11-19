@@ -13,7 +13,7 @@ public sealed class CachedNhtsaClientTests : IDisposable
     private readonly ServiceProvider _serviceProvider = new ServiceCollection().AddHybridCache().Services.BuildServiceProvider();
 
     [Fact]
-    public async Task GetVehicleTypesAsync_CalledTwice_CallsNhtsaOnce()
+    public async Task GetVehicleTypes_CalledTwice_CallsNhtsaOnce()
     {
         var handler = StubHttpMessageHandler.RespondingWithJson("""{"Results":[{"VehicleTypeName":"Passenger Car"}]}""");
         var cachedNhtsaClient = CreateCachedClient(handler);
@@ -26,7 +26,7 @@ public sealed class CachedNhtsaClientTests : IDisposable
     }
 
     [Fact]
-    public async Task GetModelsByVehicleTypeAsync_DifferentVehicleTypes_CachesEachSeparately()
+    public async Task GetModelsByVehicleType_DifferentVehicleTypes_CachesEachSeparately()
     {
         var handler = StubHttpMessageHandler.RespondingWithJson("""{"Results":[{"Model_ID":1,"Model_Name":"Accord"}]}""");
         var cachedNhtsaClient = CreateCachedClient(handler);
@@ -39,7 +39,7 @@ public sealed class CachedNhtsaClientTests : IDisposable
     }
 
     [Fact]
-    public async Task GetModelsAsync_NhtsaFails_DoesNotCacheTheFailure()
+    public async Task GetModels_NhtsaFails_DoesNotCacheTheFailure()
     {
         var handler = StubHttpMessageHandler.RespondingWithStatus(HttpStatusCode.ServiceUnavailable);
         var cachedNhtsaClient = CreateCachedClient(handler);
