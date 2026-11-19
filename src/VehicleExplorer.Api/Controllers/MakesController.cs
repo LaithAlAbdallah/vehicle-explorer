@@ -48,6 +48,8 @@ public sealed class MakesController(
         }
 
         var overview = await vehicleCatalogService.GetModelYearOverviewAsync(makeId, modelYear, cancellationToken);
-        return overview is null ? NotFound() : Ok(ModelYearOverviewResponse.From(overview));
+        return overview is null
+            ? Problem(statusCode: StatusCodes.Status404NotFound, detail: $"There is no vehicle make with id {makeId}.")
+            : Ok(ModelYearOverviewResponse.From(overview));
     }
 }

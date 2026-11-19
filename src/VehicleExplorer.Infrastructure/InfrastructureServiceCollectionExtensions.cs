@@ -19,6 +19,15 @@ public static class InfrastructureServiceCollectionExtensions
         {
             var options = serviceProvider.GetRequiredService<IOptions<NhtsaOptions>>().Value;
             httpClient.BaseAddress = options.BaseAddress;
+        })
+        // Microsoft's standard pipeline: retries with exponential backoff and jitter (on 5xx, 408, 429 and network
+        // errors), 10 s per attempt, a total timeout, and a circuit breaker for a long outage. A person is waiting in
+        // the UI, so it gives up sooner than the defaults (3 retries from 2 s, 30 s in total).
+        .AddStandardResilienceHandler(options =>
+        {
+            options.Retry.MaxRetryAttempts = 2;
+            options.Retry.Delay = TimeSpan.FromSeconds(1);
+            options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);
         });
 
         // The rest of the app asks for INhtsaClient and gets the cached decorator around the real client.

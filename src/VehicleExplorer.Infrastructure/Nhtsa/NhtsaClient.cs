@@ -1,4 +1,7 @@
 using System.Net.Http.Json;
+using System.Text.Json;
+using Polly.CircuitBreaker;
+using Polly.Timeout;
 using VehicleExplorer.Core.Vehicles;
 using VehicleExplorer.Infrastructure.Nhtsa.Responses;
 
@@ -6,7 +9,7 @@ namespace VehicleExplorer.Infrastructure.Nhtsa;
 
 /// <summary>
 /// Adapter over the NHTSA vPIC API: calls its endpoints and maps the responses to domain types.
-/// Items without a name are skipped. Upstream failures surface as <see cref="HttpRequestException"/>.
+/// Items without a name are skipped. Every upstream failure surfaces as <see cref="NhtsaUnavailableException"/>.
 /// </summary>
 public sealed class NhtsaClient(HttpClient httpClient) : INhtsaClient
 {
@@ -59,9 +62,19 @@ public sealed class NhtsaClient(HttpClient httpClient) : INhtsaClient
 
     private async Task<IReadOnlyList<TItem>> GetResultsAsync<TItem>(string requestUri, CancellationToken cancellationToken)
     {
-        var response = await httpClient.GetFromJsonAsync<NhtsaResponse<TItem>>(requestUri, cancellationToken)
-            ?? throw new HttpRequestException($"NHTSA returned an empty response for '{requestUri}'.");
+        NhtsaResponse<TItem>? response;
+        try
+        {
+            response = await httpClient.GetFromJsonAsync<NhtsaResponse<TItem>>(requestUri, cancellationToken);
+        }
+        // Error status or network error, bad JSON, the resilience timeout, or the open circuit breaker.
+        // A cancelled request (OperationCanceledException) is not a failure, so it passes through unchanged.
+        catch (Exception exception) when (exception
+            is HttpRequestException or JsonException or TimeoutRejectedException or BrokenCircuitException)
+        {
+            throw new NhtsaUnavailableException($"NHTSA request '{requestUri}' failed.", exception);
+        }
 
-        return response.Results ?? [];
+        return response?.Results ?? [];
     }
 }
