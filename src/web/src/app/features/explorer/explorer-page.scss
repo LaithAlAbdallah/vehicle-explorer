@@ -1,0 +1,29 @@
+// Plain layout only; the design comes in the polish tasks.
+.explorer {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.make-list,
+.model-list {
+  list-style: none;
+  padding: 0;
+}
+
+.model-list small {
+  margin-left: 0.5rem;
+  color: #666;
+}

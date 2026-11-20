@@ -1,0 +1,91 @@
+<main class="explorer">
+  <h1>Vehicle Explorer</h1>
+
+  <section class="filters">
+    <div class="field">
+      <label for="make-search">Vehicle make</label>
+      <input
+        #makeSearchInput
+        id="make-search"
+        type="search"
+        autocomplete="off"
+        maxlength="50"
+        placeholder="Search makes, for example Honda"
+        [value]="searchText()"
+        (input)="onSearchInput(makeSearchInput.value)"
+      />
+    </div>
+
+    <div class="field">
+      <label for="model-year">Model year</label>
+      <select #modelYearSelect id="model-year" (change)="modelYear.set(+modelYearSelect.value)">
+        @for (year of modelYears; track year) {
+          <option [value]="year" [selected]="year === modelYear()">{{ year }}</option>
+        }
+      </select>
+    </div>
+  </section>
+
+  @if (isMakeListVisible()) {
+    @if (makes.error(); as error) {
+      <p role="alert">{{ describeError(error) }}</p>
+    } @else {
+      <ul class="make-list" aria-label="Matching makes">
+        @for (make of makes.value(); track make.id) {
+          <li>
+            <button type="button" (click)="selectMake(make)">{{ make.name }}</button>
+          </li>
+        } @empty {
+          @if (!makes.isLoading()) {
+            <li>No makes match.</li>
+          }
+        }
+      </ul>
+    }
+  }
+
+  @if (selectedMake()) {
+    <section class="overview" aria-live="polite">
+      @if (overview.isLoading()) {
+        <p>Loading models…</p>
+      } @else if (overview.error(); as error) {
+        <p role="alert">
+          {{ describeError(error) }}
+          <button type="button" (click)="overview.reload()">Retry</button>
+        </p>
+      } @else if (overview.value(); as result) {
+        <h2>{{ result.make.name }} · {{ result.modelYear }}</h2>
+
+        @if (!result.isComplete) {
+          <p role="status">
+            Some vehicle types could not be loaded: {{ result.unavailableVehicleTypes.join(', ') }}.
+            <button type="button" (click)="overview.reload()">Retry</button>
+          </p>
+        }
+
+        @if (result.models.length === 0) {
+          <p>No models for this model year. Try another year.</p>
+        } @else {
+          <h3>Vehicle types</h3>
+          <ul>
+            @for (vehicleType of result.vehicleTypes; track vehicleType.name) {
+              <li>{{ vehicleType.name }} ({{ vehicleType.modelCount }})</li>
+            }
+          </ul>
+
+          <h3>Models ({{ result.models.length }})</h3>
+          <ul class="model-list">
+            @for (model of result.models; track model.id) {
+              <li>
+                {{ model.name }}
+                @if (model.vehicleTypes.length > 0) {
+                  <small>{{ model.vehicleTypes.join(', ') }}</small>
+                }
+              </li>
+            }
+          </ul>
+        }
+      }
+    </section>
+  }
+</main>
