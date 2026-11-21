@@ -1,0 +1,27 @@
+# Runs on the EC2 server: the app image that CI pushed to GHCR, with Caddy in front for HTTPS.
+# Only Caddy is reachable from outside; the app is reachable only from Caddy.
+services:
+  app:
+    image: ghcr.io/laithalabdallah/vehicle-explorer:latest
+    restart: unless-stopped
+    environment:
+      # Trust the X-Forwarded-For header from Caddy, so rate limiting sees each user's real IP.
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Keeps the HTTPS certificate across restarts, so Caddy doesn't ask for a new one each time.
+      - caddy_data:/data
+    depends_on:
+      - app
+
+volumes:
+  caddy_data:
