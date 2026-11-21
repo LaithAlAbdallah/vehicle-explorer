@@ -8,6 +8,13 @@ The data comes from the public [NHTSA vPIC API](https://vpic.nhtsa.dot.gov/api/)
 Built with .NET 10 (ASP.NET Core Web API) and Angular 22.
 The reasons behind the main choices are in [DECISIONS.md](DECISIONS.md).
 
+| Search (↑ ↓ Enter, or "/" to focus) | Results | Phone |
+|---|---|---|
+| ![Make search](docs/screenshots/search.jpg) | ![Honda 2015 results](docs/screenshots/results.jpg) | ![Results on a phone](docs/screenshots/results-phone.jpg) |
+
+Dark by default; the light theme follows the system setting. The view is in the URL, so it can be shared:
+[Honda 2015 motorcycles](https://3.127.155.152.sslip.io/?makeId=474&modelYear=2015&vehicleType=Motorcycle).
+
 ## Run with Docker
 
 Needs Docker only.
