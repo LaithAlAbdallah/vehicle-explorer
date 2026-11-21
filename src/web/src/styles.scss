@@ -1,4 +1,167 @@
+// Design tokens: every colour, size, radius and motion value comes from here.
+// Dark is the default ("Night Drive"); the light theme follows the system setting.
+:root {
+  color-scheme: dark;
+
+  --color-ground: #0a0b0d;
+  --color-surface-1: #111316;
+  --color-surface-2: #171a1e;
+  --color-hairline: rgb(255 255 255 / 8%);
+  --color-hairline-strong: rgb(255 255 255 / 14%);
+  --color-text-1: #f5f6f7;
+  --color-text-2: #c9ced6;
+  --color-text-3: #8b919a;
+  --color-accent: #ffb224;
+  --color-accent-soft: rgb(255 178 36 / 12%);
+  --color-on-inverse: #0a0b0d;
+
+  --font-sans:
+    'Inter Tight Variable', system-ui, sans-serif; // self-hosted (@fontsource), no Google requests
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  --radius: 10px;
+  --radius-small: 6px;
+  --radius-pill: 999px;
+
+  --control-height: 2.75rem; // 44 px touch target
+
+  --duration-instant: 100ms; // colour on hover and press
+  --duration-fast: 160ms; // focus, selection
+  --duration-base: 220ms; // elements entering
+  --duration-exit: 150ms; // elements leaving, faster than entering
+  --duration-story: 450ms; // the one signature move only
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-story: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+
+    --color-ground: #f7f7f8;
+    --color-surface-1: #ffffff;
+    --color-surface-2: #f0f1f3;
+    --color-hairline: rgb(0 0 0 / 8%);
+    --color-hairline-strong: rgb(0 0 0 / 16%);
+    --color-text-1: #0b0c0e;
+    --color-text-2: #3a3f47;
+    --color-text-3: #5f6570;
+    --color-accent: #965a00;
+    --color-accent-soft: rgb(150 90 0 / 12%);
+    --color-on-inverse: #ffffff;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
+  background: var(--color-ground);
+  color: var(--color-text-2);
+  font: 400 1rem/1.5 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+// Small uppercase monospace labels ("MAKE · 474", "MODELS").
+.label {
+  font: 500 0.6875rem/1.2 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+}
+
+// Pill-shaped buttons: popular makes and vehicle type chips.
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: 0 var(--space-4);
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--color-text-2);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-instant) var(--ease-out),
+    color var(--duration-instant) var(--ease-out),
+    transform var(--duration-instant) var(--ease-out);
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &[aria-pressed='true'] {
+    background: var(--color-text-1);
+    border-color: var(--color-text-1);
+    color: var(--color-on-inverse);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chip:not([aria-pressed='true']):hover {
+    background: var(--color-surface-2);
+    color: var(--color-text-1);
+  }
+}
+
+// Text for screen readers only.
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+// The signature move: the search glides from the hero into the top bar (a View Transition).
+::view-transition-group(*) {
+  animation-duration: var(--duration-story);
+  animation-timing-function: var(--ease-story);
+}
+
+// The field changes height (56 → 44 px) while it glides: keep its picture unstretched, anchored left.
+::view-transition-old(make-search),
+::view-transition-new(make-search) {
+  height: 100%;
+  object-fit: none;
+  object-position: left center;
+}
+
+// A backup only: the page does not start the transition at all under reduced motion.
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
 }
