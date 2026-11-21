@@ -22,7 +22,14 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseRateLimiter();
 
+// The Angular build is copied into wwwroot (see the Dockerfile), so one app serves the website and the API.
+app.UseStaticFiles();
+
 app.MapControllers().RequireRateLimiting(ApiRateLimitOptions.PolicyName);
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
+// Every other address is an Angular page, except unknown /api addresses, which stay 404.
+app.Map("/api/{**path}", () => Results.NotFound());
+app.MapFallbackToFile("index.html");
 
 app.Run();

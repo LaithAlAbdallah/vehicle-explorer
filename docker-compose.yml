@@ -1,0 +1,8 @@
+# One command to run the whole app: docker compose up --build, then open http://localhost:8080
+services:
+  vehicle-explorer:
+    build: .
+    image: vehicle-explorer
+    ports:
+      - "8080:8080"
+    restart: unless-stopped

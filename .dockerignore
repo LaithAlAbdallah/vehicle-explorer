@@ -1,0 +1,16 @@
+# Keep the build context small and free of local files: Docker rebuilds these itself.
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/.angular/
+.git/
+.vs/
+.vscode/
+.idea/
+.claude/
+CLAUDE.md
+tests/
+**/*.user
+.env
+.env.*
