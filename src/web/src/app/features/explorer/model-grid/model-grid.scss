@@ -1,0 +1,91 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 6.5rem;
+  padding: var(--space-4);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius);
+  // A short fade only: changing the type or year is frequent, so the cards must not dance or wait.
+  animation: appear var(--duration-exit) var(--ease-out) both;
+
+  h3 {
+    margin: 0;
+    font-weight: 500;
+    font-size: 1.125rem;
+    letter-spacing: -0.01em;
+    color: var(--color-text-1);
+    overflow-wrap: anywhere;
+  }
+
+  p {
+    margin: 0;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 0.375rem;
+      height: 0.375rem;
+      margin-inline-end: var(--space-2);
+      border-radius: 50%;
+      background: var(--color-accent);
+      vertical-align: middle;
+    }
+  }
+}
+
+// Static skeleton (no shimmer, so nothing keeps moving); it only appears if loading takes over 300 ms.
+.skeleton .card {
+  animation: appear var(--duration-base) var(--ease-out) 300ms both;
+}
+
+.bar {
+  display: block;
+  height: 1rem;
+  width: 60%;
+  border-radius: var(--radius-small);
+  background: var(--color-surface-2);
+
+  &.short {
+    width: 35%;
+    height: 0.625rem;
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 30rem) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .card {
+    min-height: 5.5rem;
+    padding: var(--space-3);
+
+    h3 {
+      font-size: 1rem;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton .card {
+    animation-delay: 0ms;
+  }
+}

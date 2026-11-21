@@ -1,0 +1,16 @@
+@if (isLoading()) {
+  <ul class="grid skeleton" aria-hidden="true">
+    @for (card of skeletonCards; track card) {
+      <li class="card"><span class="bar"></span><span class="bar short"></span></li>
+    }
+  </ul>
+} @else {
+  <ul class="grid" aria-label="Models">
+    @for (model of models(); track model.id) {
+      <li class="card">
+        <h3>{{ model.name }}</h3>
+        <p class="label">{{ model.vehicleTypes.join(' · ') || 'No vehicle type' }}</p>
+      </li>
+    }
+  </ul>
+}
