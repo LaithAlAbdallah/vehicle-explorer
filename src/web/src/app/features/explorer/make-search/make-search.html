@@ -1,0 +1,82 @@
+<div class="make-search" [class.compact]="isCompact()">
+  <label for="make-search-input" [class]="isCompact() ? 'visually-hidden' : 'label'"
+    >Vehicle make</label
+  >
+
+  <div class="field">
+    <svg
+      aria-hidden="true"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
+    <input
+      #searchInput
+      id="make-search-input"
+      type="text"
+      role="combobox"
+      aria-autocomplete="list"
+      aria-controls="make-search-listbox"
+      [attr.aria-expanded]="isListVisible()"
+      [attr.aria-activedescendant]="activeOptionId()"
+      autocomplete="off"
+      spellcheck="false"
+      maxlength="50"
+      placeholder="Search 12,000+ makes"
+      [value]="text()"
+      (input)="onInput(searchInput.value)"
+      (keydown)="onKeydown($event)"
+      (focus)="searchInput.select()"
+      (blur)="isOpen.set(false)"
+    />
+    <kbd aria-hidden="true">/</kbd>
+  </div>
+
+  <!-- mousedown is prevented so clicking an option does not blur the input and close the list first. -->
+  <ul
+    id="make-search-listbox"
+    role="listbox"
+    aria-label="Matching makes"
+    [hidden]="!isListVisible()"
+    (mousedown)="$event.preventDefault()"
+  >
+    @if (makes.error()) {
+      <li class="message">The make search is unavailable. Please try again in a moment.</li>
+    } @else {
+      @for (make of options(); track make.id; let index = $index) {
+        @let parts = highlightMatch(toMakeDisplayName(make.name), searchTerm());
+        <li
+          role="option"
+          [id]="optionId(make)"
+          [attr.aria-selected]="index === activeIndex()"
+          (click)="select(make)"
+          (mousemove)="activeIndex.set(index)"
+        >
+          <span
+            >{{ parts.before }}<mark>{{ parts.match }}</mark
+            >{{ parts.after }}</span
+          >
+          @if (index === activeIndex()) {
+            <kbd aria-hidden="true">↵</kbd>
+          }
+        </li>
+      } @empty {
+        @if (!makes.isLoading()) {
+          <li class="message">No makes match “{{ searchTerm() }}”.</li>
+        }
+      }
+    }
+  </ul>
+
+  <p class="visually-hidden" aria-live="polite">
+    @if (isListVisible() && options().length > 0) {
+      {{ options().length }} makes shown.
+    }
+  </p>
+</div>
