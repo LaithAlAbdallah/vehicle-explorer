@@ -1,89 +1,127 @@
-<main class="explorer">
-  <h1>Vehicle Explorer</h1>
-
-  <section class="filters">
-    <div class="field">
-      <label for="make-search">Vehicle make</label>
-      <input
-        #makeSearchInput
-        id="make-search"
-        type="search"
-        autocomplete="off"
-        maxlength="50"
-        placeholder="Search makes, for example Honda"
-        [value]="searchText()"
-        (input)="onSearchInput(makeSearchInput.value)"
-      />
-    </div>
-
-    <div class="field">
-      <label for="model-year">Model year</label>
-      <select #modelYearSelect id="model-year" (change)="modelYear.set(+modelYearSelect.value)">
-        @for (year of modelYears; track year) {
-          <option [value]="year" [selected]="year === modelYear()">{{ year }}</option>
-        }
-      </select>
-    </div>
-  </section>
-
-  @if (isMakeListVisible()) {
-    @if (makes.error(); as error) {
-      <p role="alert">{{ describeError(error) }}</p>
-    } @else {
-      <ul class="make-list" aria-label="Matching makes">
-        @for (make of makes.value(); track make.id) {
-          <li>
-            <button type="button" (click)="selectMake(make)">{{ make.name }}</button>
-          </li>
-        } @empty {
-          @if (!makes.isLoading()) {
-            <li>No makes match.</li>
-          }
-        }
-      </ul>
-    }
+<header class="top-bar">
+  <button type="button" class="brand" aria-label="Vehicle Explorer, new search" (click)="goHome()">
+    <i aria-hidden="true"></i><span class="brand-name">Vehicle Explorer</span>
+  </button>
+  @if (makeId() !== undefined) {
+    <app-make-search
+      isCompact
+      [selectedMakeName]="makeName()"
+      (makeSelected)="selectMake($event)"
+    />
   }
+</header>
 
-  @if (selectedMake()) {
-    <section class="overview" aria-live="polite">
-      @if (overview.isLoading()) {
-        <p>Loading models…</p>
-      } @else if (overview.error(); as error) {
-        <p role="alert">
-          {{ describeError(error) }}
-          <button type="button" (click)="overview.reload()">Retry</button>
-        </p>
-      } @else if (overview.value(); as result) {
-        <h2>{{ result.make.name }} · {{ result.modelYear }}</h2>
-
-        @if (!result.isComplete) {
-          <p role="status">
-            Some vehicle types could not be loaded: {{ result.unavailableVehicleTypes.join(', ') }}.
-            <button type="button" (click)="overview.reload()">Retry</button>
+<main>
+  @if (makeId() === undefined) {
+    <section class="hero">
+      <p class="label">NHTSA vehicle database · {{ modelYearRange }}</p>
+      <h1>Every vehicle make.<br /><span>Every model year.</span></h1>
+      <app-make-search (makeSelected)="selectMake($event)" />
+      <div class="popular" role="group" aria-label="Popular makes">
+        @for (make of popularMakes; track make.id) {
+          <button type="button" class="chip" (click)="selectMake(make)">
+            {{ toMakeDisplayName(make.name) }}
+          </button>
+        }
+      </div>
+    </section>
+  } @else {
+    <section class="results-head">
+      <div>
+        <p class="label">Make</p>
+        <h1 class="make-name" tabindex="-1" #makeHeading>
+          @if (makeName()) {
+            {{ makeName() }}
+          } @else if (isNotFound(overview.error())) {
+            Unknown make
+          } @else {
+            <span class="name-placeholder"></span><span class="visually-hidden">Loading make</span>
+          }
+        </h1>
+      </div>
+      <div class="stats">
+        @if (modelYearOverview(); as modelYearOverview) {
+          <p class="stat">
+            <b>{{ modelYearOverview.models.length }}</b><span class="label">Models</span>
+          </p>
+          <p class="stat">
+            <b>{{ modelYearOverview.vehicleTypes.length }}</b><span class="label">Types</span>
           </p>
         }
+        <app-model-year-picker
+          [modelYear]="modelYear()"
+          (modelYearChange)="selectModelYear($event)"
+        />
+      </div>
+    </section>
 
-        @if (result.models.length === 0) {
-          <p>No models for this model year. Try another year.</p>
+    <section class="results">
+      <p class="visually-hidden" aria-live="polite">
+        @if (modelYearOverview()) {
+          {{ visibleModels().length }} models shown.
+        }
+      </p>
+      @if (overview.error(); as error) {
+        <div class="notice" role="alert">
+          <p>{{ describeError(error) }}</p>
+          @if (!isNotFound(error)) {
+            <button type="button" class="chip" (click)="overview.reload()">Retry</button>
+          }
+          <button type="button" class="chip" (click)="goHome()">New search</button>
+        </div>
+      } @else if (overview.isLoading()) {
+        <app-model-grid isLoading />
+      } @else if (modelYearOverview(); as modelYearOverview) {
+        @if (!modelYearOverview.isComplete) {
+          <div class="notice" role="status">
+            <p>
+              Some vehicle types could not be loaded:
+              {{ modelYearOverview.unavailableVehicleTypes.join(', ') }}.
+            </p>
+            <button type="button" class="chip" (click)="overview.reload()">Retry</button>
+          </div>
+        }
+
+        @if (modelYearOverview.models.length === 0) {
+          <div class="empty">
+            <p class="empty-title">No {{ makeName() }} models in {{ modelYear() }}.</p>
+            <p>NHTSA has no models for this make and model year. Try another year.</p>
+          </div>
         } @else {
-          <h3>Vehicle types</h3>
-          <ul>
-            @for (vehicleType of result.vehicleTypes; track vehicleType.name) {
-              <li>{{ vehicleType.name }} ({{ vehicleType.modelCount }})</li>
-            }
-          </ul>
+          <div class="toolbar">
+            <app-vehicle-type-filter
+              [vehicleTypes]="modelYearOverview.vehicleTypes"
+              [totalModelCount]="modelYearOverview.models.length"
+              [selectedVehicleType]="vehicleType()"
+              (selectedVehicleTypeChange)="selectVehicleType($event)"
+            />
+            <label class="model-filter">
+              <span class="visually-hidden">Filter models</span>
+              <input
+                #filterInput
+                type="search"
+                placeholder="Filter models"
+                autocomplete="off"
+                [value]="modelFilter()"
+                (input)="modelFilter.set(filterInput.value)"
+              />
+            </label>
+          </div>
 
-          <h3>Models ({{ result.models.length }})</h3>
-          <ul class="model-list">
-            @for (model of result.models; track model.id) {
-              <li>
-                {{ model.name }}
-                @if (model.vehicleTypes.length > 0) {
-                  <small>{{ model.vehicleTypes.join(', ') }}</small>
-                }
-              </li>
-            }
-          </ul>
+          @if (visibleModels().length > 0) {
+            <app-model-grid [models]="visibleModels()" />
+          } @else {
+            <div class="empty">
+              <p class="empty-title">No models match.</p>
+              <button
+                type="button"
+                class="chip"
+                (click)="modelFilter.set(''); selectVehicleType(undefined)"
+              >
+                Show all models
+              </button>
+            </div>
+          }
         }
       }
     </section>
