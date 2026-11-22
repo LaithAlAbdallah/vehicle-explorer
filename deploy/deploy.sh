@@ -12,8 +12,9 @@ cd "$(dirname "$0")"
 
 ssh -i "$KEY_FILE" "$SERVER" "mkdir -p ~/vehicle-explorer"
 scp -i "$KEY_FILE" docker-compose.yml Caddyfile "$SERVER:~/vehicle-explorer/"
-# Pull the newest image, then start or update the containers.
+# Save the site address in .env (Docker Compose reads it by itself, also when run by hand on the server),
+# then pull the newest image and start or update the containers.
 ssh -i "$KEY_FILE" "$SERVER" \
-  "cd ~/vehicle-explorer && export SITE_ADDRESS=$SITE_ADDRESS && docker compose pull && docker compose up -d"
+  "cd ~/vehicle-explorer && echo SITE_ADDRESS=$SITE_ADDRESS > .env && docker compose pull && docker compose up -d"
 
 echo "Live at https://$SITE_ADDRESS"
